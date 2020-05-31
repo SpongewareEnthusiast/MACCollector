@@ -1,9 +1,10 @@
-//TODO implement save to file feature
+// this gets the value of the field, takes html ID and returns the value
 function get_name_value(fieldName) {
     var value = document.getElementById(fieldName).value;
     return value;
 
 };
+//this creates the timestamp ex 120320154622 for 12 March 2020 15:46:22
 function createTimestamp(){
     let current_datetime = new Date()
     let formatted_date = current_datetime.getFullYear() + "-" + (current_datetime.getMonth() + 1) + "-" + current_datetime.getDate() + " " + current_datetime.getHours() + ":" + current_datetime.getMinutes() + ":" + current_datetime.getSeconds() 
@@ -28,31 +29,35 @@ function createTimestamp(){
         this.receivedEvent("deviceready");
         console.log("I am ready");
         console.log(cordova.file);
+        //on ready the two fields for input will be disabled until name is saved
         document.getElementById('MACInput').disabled = true; 
-                document.getElementById('scanCode').disabled = true; 
+        document.getElementById('scanCode').disabled = true; 
     },
 
     // Update DOM on a Received Event
     receivedEvent: function(id) {
-           
+       //storage initialisation
        var storage = window.localStorage;
+       // currentLocation is stored as a global variable so that updates to the local storage are possible
        var currentLocation;
-       
+       //this adds new name as a key to local storage with empty value. it also sets the currentLocation
        function addNewCollection(name){
            currentLocation = name;
            storage.setItem(name, []);
         
        };
-
+       //this function "builds up" the value of the current key, by adding new values to the end
        function addMACToCollection(host, model){
            
        
         let existing = storage.getItem(currentLocation);
-        if(existing.lenght==!0){
+        //check for non emptiness of the currentLocation value to avoid adding comma at the front
+        if(existing.lenght!==0){
         existing = `,${existing} ${model} ${host},`;
         
         storage.setItem(currentLocation, existing);
         }
+        //case for locations not previously existing in localStorage
         else{
             existing = `${existing} ${model} ${host},`;
         
@@ -60,7 +65,7 @@ function createTimestamp(){
 
         }
        };
-                                              
+        //this exports contents of local storage as a CSV and saves it as CSV in Download folder                                      
        function createExportFile() {
         window.resolveLocalFileSystemURL(cordova.file.externalRootDirectory  + 'Download/', function(dir) {
             //cordova.file.externalDataDirectory revert to
@@ -77,7 +82,7 @@ function createTimestamp(){
               console.log("got the file", file);
               logOb = file;
               var csv = "";
-              //we should have the same amount of name/cookie fields
+             // iterating over the local storage
               for(var i =0; i<storage.length;i++){
                 
               var name = storage.key(i);
@@ -108,16 +113,17 @@ function createTimestamp(){
         
 
        };
-          
-       function register(oucu) {};
-               
-       function volunteer(oucu, address, start_time, end_time) {};
-
-       
-       function request(oucu,address,start_time) {};
-         
-       function cancel(oucu) {};
-
+       /**  
+        * STUB functions for alter
+        * function register(oucu) {};
+        *       
+        * function volunteer(oucu, address, start_time, end_time) {};
+        *
+        *
+        * function request(oucu,address,start_time) {};
+        *
+        * function cancel(oucu) {};
+        */  
        
         function Collector(){
 
@@ -125,7 +131,7 @@ function createTimestamp(){
             var collectorObject = {};
          
 
-            //Start updating the map with matches to the request or volunteer
+            //Changes the UI once the name is saved 
             collectorObject.saveCollectionName= function(){
                 var name = document.getElementById("collectionName").value;
                 console.log(`Value ${name} have been taken`)
@@ -140,12 +146,13 @@ function createTimestamp(){
                     alert("Location cannot be empty!");
                 }
             };
+            //takes the valuse that are typed and cleans the input field
             collectorObject.saveTypedValue = function(){
                 let MAC = document.getElementById("MACInput").value;
                 this.addOnScreen(MAC);
                 document.getElementById("MACInput").value="";
             }
-            //Stop updating the map with matches
+            //Creates ordered list of elements being added on the go
             collectorObject.addOnScreen = function(MAC){
                 var model ="";
                 MAC = MAC.replace(/:/g,"").toUpperCase();
@@ -160,7 +167,7 @@ function createTimestamp(){
                 }
                 // strong valid enabled
                 if(MAC.length === 12 || MAC.length ===17 || MAC.length===8){
-                //if(MAC.length !==0){
+                //if(MAC.length !==0){ debug validation
                     if(MAC.substring(0,4)==="6C2B"){
                         model = "";
                         host = `${MAC}.luht.scot.nhs.uk`;
@@ -215,7 +222,7 @@ function createTimestamp(){
                 }
             };
 
-            //Register a user with the web service
+            //this calls the Barcode scanner plugin 
             collectorObject.takeBarCode = function (){
                 cordova.plugins.barcodeScanner.scan(
                     function (result) {
@@ -235,7 +242,7 @@ function createTimestamp(){
                         showFlipCameraButton : true, // iOS and Android
                         showTorchButton : true, // iOS and Android
                         torchOn: true, // Android, launch with the torch switched on (if available)
-                        saveHistory: true, // Android, save scan history (default false)
+                        saveHistory: false, // Android, save scan history (default false)
                         prompt : "Place the barcode or QR in scanning area", // Android
                         resultDisplayDuration: 500, // Android, display scanned text for X ms. 0 suppresses it entirely, default 1500
                         //formats : "QR_CODE,PDF_417", // default: all but PDF_417 and RSS_EXPANDED
@@ -247,25 +254,25 @@ function createTimestamp(){
                  
             };
 
-            //Indicate that the user wants to volunteer to share their taxi
+            //Clers the LocalStorage, asks for confirmation first
             collectorObject.clearStorage = function (){
                 if (confirm('Are you sure you want to clear the storage?')) {
                     storage.clear();
-                    console.log('Thing was saved to the database.');
+                    
                   } else {
                     // Do nothing!
-                    console.log('Thing was not saved to the database.');
+                    console.log('Not cleared');
                   }
                 
             };
            
-            //Indicate that the user wants to share a taxi somebody else has booked.
+            //this reloads the html index page so that the UI is blank and collecting for new location is possible
             collectorObject.startNewArea = function (){
                 location.reload();
                 return false;
             };
 
-            //Cancel all current volunteers and requests for this user.
+            //calls the export function in app object unless localStorage is empty
             collectorObject.exportAll = function (){
                if(storage.length!==0){
                 createExportFile();
@@ -277,7 +284,7 @@ function createTimestamp(){
 
             };
             
-            //Cancel all current volunteers and requests for this user.
+            //Handy stub
             collectorObject.cancel = function (){};
 
             //return the intialised object
