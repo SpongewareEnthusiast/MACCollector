@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html>
+    <head>
+         
+        <meta http-equiv="Content-Security-Policy" content="">
+        <meta name="format-detection" content="telephone=no">
+        <meta name="msapplication-tap-highlight" content="no">
+        <meta name="viewport" content="initial-scale=1, width=device-width, viewport-fit=cover">
+        <link rel="stylesheet" href="https://code.jquery.com/mobile/1.4.5/jquery.mobile-1.4.5.min.css" />
+<script src="https://code.jquery.com/jquery-1.11.1.min.js"></script>
+<script src="https://code.jquery.com/mobile/1.4.5/jquery.mobile-1.4.5.min.js"></script>
+        <link rel="stylesheet" type="text/css" href="css/index.css">
+        <title>MAC Collect</title>
+    </head>
+    <body>
+        <div class="app">
+            <h1>MAC Collector</h1>
+            
+            <div id="nameContainer">
+                <label for="collectionName">Collection name: </label>
+                <input id="collectionName" class="txtInput" type="text" maxlength="12" placeholder="Type collection name..."> <button id="saveCollectionName" onclick="app.collector.saveCollectionName()">
+                <img src="img\save.png" height="15"></button>
+            </div> 
+            <div class="results">
+                <ul id="results"></ul> 
+            </div>
+            
+               
+            <div id="interactions">
+                <button id="scanCode" onclick="app.collector.takeBarCode()" >Scan code</button>
+                <label for="MACInput">Or type: </label>
+                <input id="MACInput" type="text"class="txtInput" maxlength="17" required placeholder="Type MAC or AS number for desktop" > <button id="saveCollectionName" onclick="app.collector.saveTypedValue()" >
+                <img src="img\save.png" height="15"></button>
+            <div data-role="footer">
+            <button id="export" class="bottom-btns" onclick="app.collector.exportAll()"> Export all and end session</button>
+            <button id="export" class="bottom-btns" onclick="app.collector.startNewArea()"> Start new area</button>
+            <button id="export" class="bottom-btns" onclick="app.collector.clearStorage()"> Clear storage</button>
+            </div>
+        </div>   
+       
+        <script type="text/javascript" src="cordova.js"></script>
+        <script type="text/javascript" src="js/index.js"></script>
+    </body>
+</html>
